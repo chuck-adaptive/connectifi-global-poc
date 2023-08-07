@@ -1,39 +1,64 @@
-import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.ts'
 import { createAgent } from '@connectifi/agent-web'
 import { DesktopAgent } from '@finos/fdc3'
+import { contextFerry } from './context-ferry';
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
+class EnvironmentError extends Error {}
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+const environmentCheck = () => {
+  if (window.fdc3) {
+    throw new EnvironmentError('"fdc3" global already found')
+  }
 
-const fdc3Global = async () => {
-  //create the agent and assign to the window
+  if (window.chrome === undefined) {
+    throw new EnvironmentError('"chrome" not found on "window"')
+  }
+
+  if (window.chrome.webview === undefined) {
+    throw new EnvironmentError('"webview" not found on "window.chrome" global')
+  }
+}
+
+const onDisconnect = async () => {
+  // TODO - fully handle disconnect
+  await init()
+}
+
+const addFDC3Global = async () => {
   window.fdc3 = await createAgent(
     'https://dev.connectifi-interop.com',
-    'local-dotnet@Demo'
+    'local-dotnet@Demo',
+    {
+      onDisconnect
+    }
   ) as DesktopAgent;
-
-  //fire the fdc3Ready event
-  document.dispatchEvent(new CustomEvent('fdc3Ready', {}));
 };
 
-fdc3Global()
+const setupListeners = async () => {
+  const listener = await window.fdc3.addContextListener(null, contextFerry)
+
+  window.addEventListener('beforeunload', () => {
+    listener.unsubscribe()
+  })
+}
+
+const init = async () => {
+  try {
+    environmentCheck()
+    await addFDC3Global()
+    await setupListeners()
+
+    // WebView2 can wait for this all to be complete
+    // https://stackoverflow.com/a/66053672
+    // https://learn.microsoft.com/en-us/dotnet/api/microsoft.web.webview2.winforms.webview2.navigationcompleted?view=webview2-dotnet-1.0.705.50&WT.mc_id=DT-MVP-5003235
+    // the NavigationComplete event fires when the onload is complete
+  } catch (e) {
+    if (e instanceof EnvironmentError) {
+      console.log('Environment Error - is the page running in a WebView2?')
+      console.log('Error Message: ', e.message)
+    } else {
+      console.log('Unknown Error', e)
+    }
+  }
+}
+
+init()
