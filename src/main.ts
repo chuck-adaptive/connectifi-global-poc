@@ -5,31 +5,28 @@ import { contextFerry } from './context-ferry';
 class EnvironmentError extends Error {}
 
 const environmentCheck = () => {
-  if (window.fdc3) {
-    throw new EnvironmentError('"fdc3" global already found')
-  }
+  try {
+    if (window.fdc3) {
+      throw new EnvironmentError('"fdc3" global already found')
+    }
 
-  if (window.chrome === undefined) {
-    throw new EnvironmentError('"chrome" not found on "window"')
-  }
+    if (window.chrome === undefined) {
+      throw new EnvironmentError('"chrome" not found on "window"')
+    }
 
-  if (window.chrome.webview === undefined) {
-    throw new EnvironmentError('"webview" not found on "window.chrome" global')
+    if (window.chrome.webview === undefined) {
+      throw new EnvironmentError('"webview" not found on "window.chrome" global')
+    }
+  } catch (e) {
+    console.error('Environment Check Failed')
+    console.error(e)
   }
-}
-
-const onDisconnect = async () => {
-  // TODO - fully handle disconnect
-  await init()
 }
 
 const addFDC3Global = async () => {
   window.fdc3 = await createAgent(
     'https://dev.connectifi-interop.com',
     'local-dotnet@Demo',
-    {
-      onDisconnect
-    }
   ) as DesktopAgent;
 };
 
