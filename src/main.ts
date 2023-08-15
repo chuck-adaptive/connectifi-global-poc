@@ -1,6 +1,6 @@
 import { createAgent } from '@connectifi/agent-web'
 import { DesktopAgent } from '@finos/fdc3'
-import { contextFerry } from './context-ferry';
+import { contextFerry, openFerry, resolveFerry } from './ferry';
 
 class EnvironmentError extends Error {}
 
@@ -27,6 +27,12 @@ const addFDC3Global = async () => {
   window.fdc3 = await createAgent(
     'https://dev.connectifi-interop.com',
     'local-dotnet@Demo',
+    {
+      // headless is required to disable the resolver UI
+      headless: true,
+      resolverHandler: resolveFerry,
+      openHandler: openFerry,
+    }
   ) as DesktopAgent;
 };
 
