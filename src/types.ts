@@ -1,3 +1,5 @@
+import { ResolveCallback } from "@connectifi/agent-web";
+
 export {}
 
 interface WebViewEventListenerObject {
@@ -13,6 +15,9 @@ interface WebViewEventListener
 // Not officiall on definitely-typed yet, but the surface area of the APIs we are using is small
 declare global {
   interface Window {
+      __container: {
+        handleIntentResolution: ResolveCallback;
+      };
       chrome?: {
           webview?: {
               addEventListener: (

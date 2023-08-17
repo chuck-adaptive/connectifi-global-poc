@@ -11,17 +11,19 @@ export const contextFerry: ContextHandler = (context) => {
 
 export const resolveFerry: AgentConfig["resolverHandler"] = (
   message: IntentResolutionMessage,
-  _callback: ResolveCallback
+  callback: ResolveCallback
 ) => {
   console.log('BEGIN resolveFerry call')
   console.log(message)
-  console.log('END resolveFerry call')
+  window.__container.handleIntentResolution = callback
+  console.log('updated __container.handleIntentResolution')
   window.chrome?.webview?.postMessage(JSON.stringify({ guid: 'resolveFerry', message}))
+  console.log('END resolveFerry call')
 }
 
 export const openFerry: AgentConfig["openHandler"] = (message) => {
   console.log('BEGIN openFerry call')
   console.log(message)
-  console.log('END openFerry call')
   window.chrome?.webview?.postMessage(JSON.stringify({ guid: 'openFerry', message}))
+  console.log('END openFerry call')
 }
