@@ -15,7 +15,7 @@ export const resolveFerry: AgentConfig["resolverHandler"] = (
 ) => {
   console.log('BEGIN resolveFerry call')
   console.log(message)
-  window.__container.handleIntentResolution = callback
+  window.__container = { handleIntentResolution: callback }
   console.log('updated __container.handleIntentResolution')
   window.chrome?.webview?.postMessage(JSON.stringify({ guid: 'resolveFerry', message}))
   console.log('END resolveFerry call')
