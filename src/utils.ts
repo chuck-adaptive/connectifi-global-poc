@@ -12,7 +12,7 @@ const clickSignInButton = () => {
   }
 }
 
-export const onAuthFail = (directory: string) => {
+export const onAuthError = (directory: string) => {
   if (isHeadless()) {
     window.localStorage.setItem('headless', 'false')
     window.location.reload()

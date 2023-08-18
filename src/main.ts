@@ -1,7 +1,7 @@
 import { createAgent } from '@connectifi/agent-web'
 import { DesktopAgent } from '@finos/fdc3'
 import { IContainerGlobal, connectedFerry, contextFerry, openFerry, resolveFerry } from './ferry';
-import { isHeadless, onAuthFail } from './utils';
+import { isHeadless, onAuthError } from './utils';
 
 class EnvironmentError extends Error {}
 
@@ -35,10 +35,10 @@ const addFDC3Global = async () => {
     {
       // headless is required to disable the resolver UI
       headless,
-      resolverHandler: resolveFerry,
-      openHandler: openFerry,
-      onAuthFail,
-      onConnect: connectedFerry
+      handleIntentResolution: resolveFerry,
+      handleOpen: openFerry,
+      onAuthError,
+      onConnected: connectedFerry
     }
   ) as DesktopAgent;
 };
