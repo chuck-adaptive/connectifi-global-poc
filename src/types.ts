@@ -11,13 +11,16 @@ interface WebViewEventListener
     (evt: Event & { data?: any }): void;
 }
 
+export interface IContainerGlobal {
+    handleIntentResolution: ResolveCallback;
+    clickSignIn: () => void;
+}
+
 // Just some types for the WebView2 globals
 // Not officiall on definitely-typed yet, but the surface area of the APIs we are using is small
 declare global {
   interface Window {
-      __container: {
-        handleIntentResolution: ResolveCallback;
-      };
+      __container: IContainerGlobal;
       chrome?: {
           webview?: {
               addEventListener: (

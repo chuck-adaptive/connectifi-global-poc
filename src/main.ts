@@ -1,6 +1,7 @@
 import { createAgent } from '@connectifi/agent-web'
 import { DesktopAgent } from '@finos/fdc3'
-import { contextFerry, openFerry, resolveFerry } from './ferry';
+import { IContainerGlobal, connectedFerry, contextFerry, openFerry, resolveFerry } from './ferry';
+import { isHeadless, onAuthFail } from './utils';
 
 class EnvironmentError extends Error {}
 
@@ -24,19 +25,26 @@ const environmentCheck = () => {
 }
 
 const addFDC3Global = async () => {
+  const headless = isHeadless()
+
+  console.log('Headless Value', headless)
+
   window.fdc3 = await createAgent(
     'https://dev.connectifi-interop.com',
-    'local-dotnet@Demo',
+    'local-dotnet@DemoSecure',
     {
       // headless is required to disable the resolver UI
-      headless: true,
+      headless,
       resolverHandler: resolveFerry,
       openHandler: openFerry,
+      onAuthFail,
+      onConnect: connectedFerry
     }
   ) as DesktopAgent;
 };
 
 const setupListeners = async () => {
+  // TODO refactor
   const listener = await window.fdc3.addContextListener(null, contextFerry)
 
   window.addEventListener('beforeunload', () => {
@@ -44,8 +52,21 @@ const setupListeners = async () => {
   })
 }
 
+const initializeContainerGlobal = () => {
+  const defaultContainerGlobal: IContainerGlobal  = {
+    handleIntentResolution: (selected, intent) => {
+      console.log(`Default handleIntentResolution for ${selected} ${intent}`)
+    },
+    clickSignIn: () => {
+      console.log('Default clickSignIn')
+    }
+  }
+  window.__container = defaultContainerGlobal
+}
+
 const init = async () => {
   try {
+    initializeContainerGlobal()
     environmentCheck()
     await addFDC3Global()
     await setupListeners()
