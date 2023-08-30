@@ -14,6 +14,7 @@ interface WebViewEventListener
 export interface IContainerGlobal {
     handleIntentResolution: ResolveCallback;
     clickSignIn: () => void;
+    registerIntentWithGuid: (intent: string, dotNetGuid: string) => void;
 }
 
 // Just some types for the WebView2 globals

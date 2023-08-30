@@ -1,7 +1,7 @@
 import { createAgent } from '@connectifi/agent-web'
 import { DesktopAgent } from '@finos/fdc3'
 import { IContainerGlobal, connectedFerry, contextFerry, openFerry, resolveFerry } from './ferry';
-import { isHeadless, onAuthError } from './utils';
+import { isHeadless, onAuthError, registerIntentWithGuid } from './utils';
 
 class EnvironmentError extends Error {}
 
@@ -52,13 +52,21 @@ const setupListeners = async () => {
   })
 }
 
-const initializeContainerGlobal = () => {
+const instantiateContainerGlobals = () => {
+  // should be globally available after the agent is created
+  window.__container.registerIntentWithGuid = registerIntentWithGuid
+}
+
+const initializeDefaultContainerGlobal = () => {
   const defaultContainerGlobal: IContainerGlobal  = {
     handleIntentResolution: (selected, intent) => {
       console.log(`Default handleIntentResolution for ${selected} ${intent}`)
     },
     clickSignIn: () => {
       console.log('Default clickSignIn')
+    },
+    registerIntentWithGuid: (intent, dotNetGuid) => {
+      console.log(`Default registerIntentWithGuid for ${intent} ${dotNetGuid}`)
     }
   }
   window.__container = defaultContainerGlobal
@@ -66,10 +74,11 @@ const initializeContainerGlobal = () => {
 
 const init = async () => {
   try {
-    initializeContainerGlobal()
+    initializeDefaultContainerGlobal()
     environmentCheck()
     await addFDC3Global()
     await setupListeners()
+    instantiateContainerGlobals()
 
     // WebView2 can wait for this all to be complete
     // https://stackoverflow.com/a/66053672
