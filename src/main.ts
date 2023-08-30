@@ -1,7 +1,7 @@
 import { createAgent } from '@connectifi/agent-web'
 import { DesktopAgent } from '@finos/fdc3'
 import { IContainerGlobal, connectedFerry, contextFerry, openFerry, resolveFerry } from './ferry';
-import { isHeadless, onAuthError, registerIntentWithGuid } from './utils';
+import { isHeadless, onAuthError, registerIntentListenerWithGuid } from './utils';
 
 class EnvironmentError extends Error {}
 
@@ -54,7 +54,7 @@ const setupListeners = async () => {
 
 const instantiateContainerGlobals = () => {
   // should be globally available after the agent is created
-  window.__container.registerIntentWithGuid = registerIntentWithGuid
+  window.__container.registerIntentListenerWithGuid = registerIntentListenerWithGuid
 }
 
 const initializeDefaultContainerGlobal = () => {
@@ -65,7 +65,7 @@ const initializeDefaultContainerGlobal = () => {
     clickSignIn: () => {
       console.log('Default clickSignIn')
     },
-    registerIntentWithGuid: (intent, dotNetGuid) => {
+    registerIntentListenerWithGuid: (intent, dotNetGuid) => {
       console.log(`Default registerIntentWithGuid for ${intent} ${dotNetGuid}`)
     }
   }
