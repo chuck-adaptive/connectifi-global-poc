@@ -23,8 +23,12 @@ export const onAuthError = (directory: string) => {
   }
 }
 
-export const registerIntentListenerWithGuid = (intent: string, dotNetGuid: string) => {
-  window.fdc3.addIntentListener(intent, (context) => {
+export const registerIntentListenerWithGuid = async (intent: string, dotNetGuid: string) => {
+  const intentListener = await window.fdc3.addIntentListener(intent, (context) => {
     window.chrome?.webview?.postMessage(JSON.stringify({ guid: 'intentListener', dotNetGuid, context }))
+  })
+
+  window.addEventListener('beforeunload', () => {
+    intentListener.unsubscribe()
   })
 }
